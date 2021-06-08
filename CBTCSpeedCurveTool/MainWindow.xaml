@@ -29,7 +29,10 @@
             IsQuickAccessToolBarVisible="False">
             <Fluent:RibbonTabItem Header="菜单">
                 <Fluent:RibbonGroupBox Header="配置">
-                    <Fluent:Button Header="配置参数" LargeIcon="Pictures/setting.png" />
+                    <Fluent:Button
+                        Command="{Binding SetParametersCM}"
+                        Header="配置参数"
+                        LargeIcon="Pictures/setting.png" />
                     <Fluent:Button Header="更新图像" LargeIcon="Pictures/update.png" />
                 </Fluent:RibbonGroupBox>
             </Fluent:RibbonTabItem>

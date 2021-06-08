@@ -1,4 +1,6 @@
+using CBTCSpeedCurveTool.Views;
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
 using LiveCharts;
 using LiveCharts.Wpf;
 using System.Windows.Media;
@@ -42,7 +44,7 @@ namespace CBTCSpeedCurveTool.ViewModel
         #endregion
 
         #region <ÃüÁî>
-
+        public RelayCommand SetParametersCM { get; set; }
         #endregion
 
         public MainViewModel()
@@ -70,6 +72,7 @@ namespace CBTCSpeedCurveTool.ViewModel
                 },
             };
 
+            //Ìí¼Ó×ø±êÖá
             AxisXCollection = new AxesCollection()
             {
                 new Axis()
@@ -79,7 +82,6 @@ namespace CBTCSpeedCurveTool.ViewModel
                     Foreground=AxisBrush
                 }
             };
-
             AxisYCollection = new AxesCollection()
             {
                 new Axis()
@@ -93,7 +95,13 @@ namespace CBTCSpeedCurveTool.ViewModel
 
         private void InitCommands()
         {
+            SetParametersCM = new RelayCommand(SetParametersFunc);
+        }
 
+        private void SetParametersFunc()
+        {
+            SetParamView view = new SetParamView();
+            view.ShowDialog();
         }
         #endregion
     }
