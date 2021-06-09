@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace CBTCSpeedCurveTool.ViewModel
 {
@@ -64,7 +65,23 @@ namespace CBTCSpeedCurveTool.ViewModel
 
         private void OkButtonFunc()
         {
-
+            try
+            {
+                foreach(ParamItem item in ParamList)
+                {
+                    //检查是否能取到double类型数据
+                    double _ = item.RealParamValue;
+                }
+                MessageBox.Show("设置成功！", "通知", MessageBoxButton.OK, MessageBoxImage.Information);
+                view.Close();
+                GlobalParams.ParamList = new List<ParamItem>(ParamList);
+                GlobalParams.PointsCount = 50;
+                GlobalParams.ShowConnLine = true;
+            }
+            catch
+            {
+                MessageBox.Show("参数格式错误！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CancleButtonFunc()

@@ -110,7 +110,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Classes\GlobalParams.cs" />
     <Compile Include="Classes\ParamItem.cs" />
+    <Compile Include="Classes\XYPoint.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\SetParamViewModel.cs" />
     <Compile Include="Views\SetParamView.xaml.cs">

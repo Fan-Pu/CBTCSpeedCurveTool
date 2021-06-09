@@ -8,8 +8,8 @@
     xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="CBTC速度曲线工具"
-    Width="1200"
-    Height="600"
+    Width="1600"
+    Height="900"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     mc:Ignorable="d">
@@ -33,7 +33,10 @@
                         Command="{Binding SetParametersCM}"
                         Header="配置参数"
                         LargeIcon="Pictures/setting.png" />
-                    <Fluent:Button Header="更新图像" LargeIcon="Pictures/update.png" />
+                    <Fluent:Button
+                        Command="{Binding UpdateCanvasCM}"
+                        Header="更新图像"
+                        LargeIcon="Pictures/update.png" />
                 </Fluent:RibbonGroupBox>
             </Fluent:RibbonTabItem>
         </Fluent:Ribbon>
@@ -43,7 +46,7 @@
             Margin="10,10,0,10"
             AxisX="{Binding AxisXCollection}"
             AxisY="{Binding AxisYCollection}"
-            LegendLocation="Top"
+            LegendLocation="None"
             Series="{Binding CBTCSeries}" />
 
         <Fluent:StatusBar
