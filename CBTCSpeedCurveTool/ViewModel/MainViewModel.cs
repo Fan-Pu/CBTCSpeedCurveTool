@@ -168,7 +168,7 @@ namespace CBTCSpeedCurveTool.ViewModel
 
                 //绘制临时限速曲线
                 var temp_speed_color = Colors.Gray;
-                var temp_speed_brush = new SolidColorBrush(Color.FromArgb(70, temp_speed_color.R, temp_speed_color.G, temp_speed_color.B));
+                var temp_speed_brush = new SolidColorBrush(Color.FromArgb(100, temp_speed_color.R, temp_speed_color.G, temp_speed_color.B));
                 var temp_speed_restr_line = new LineSeries()
                 {
                     Title = "临时限速",
@@ -197,14 +197,53 @@ namespace CBTCSpeedCurveTool.ViewModel
                 while (GEBR_points.Count <= GlobalParams.PointsCount)
                 {
                     //设定速度不超过临时限速
+                    double primal_cur_y = cur_y;
+                    XYPoint addtion_point = null;
                     if (cur_x >= temp_speed_restr_start_point && cur_x <= temp_speed_restr_end_point)
                     {
                         cur_y = Math.Min(cur_y, temp_speed_restr / 3.6);
+                        //限速终点处且改点大于限速值再添加一个重复的点
+                        if ((cur_x == temp_speed_restr_start_point || cur_x == temp_speed_restr_end_point) &&
+                            primal_cur_y > temp_speed_restr / 3.6)
+                        {
+                            addtion_point = new XYPoint(cur_x, primal_cur_y * 3.6);
+                        }
                     }
 
                     //设定速度不超过最大值
                     cur_y = Math.Min(cur_y, max_veloc / 3.6);
-                    GEBR_points.Add(new XYPoint(cur_x, cur_y * 3.6));
+                    //限速起点，先添加限速值再添加超速值
+                    if (cur_x == temp_speed_restr_start_point)
+                    {                       
+                        if (addtion_point != null)
+                        {
+                            GEBR_points.Add(new XYPoint(cur_x, cur_y * 3.6));
+                            GEBR_points.Add(addtion_point);
+                            cur_y = primal_cur_y;
+                        }
+                        else
+                        {
+                            GEBR_points.Add(new XYPoint(cur_x, cur_y * 3.6));
+                        }
+                    }
+                    //限速终点，先添加超速值再添加限速值
+                    else if (cur_x == temp_speed_restr_end_point)
+                    {                     
+                        if (addtion_point != null)
+                        {
+                            GEBR_points.Add(addtion_point);
+                            GEBR_points.Add(new XYPoint(cur_x, cur_y * 3.6));
+                            cur_y = primal_cur_y;
+                        }
+                        else
+                        {
+                            GEBR_points.Add(new XYPoint(cur_x, cur_y * 3.6));
+                        }
+                    }
+                    else
+                    {
+                        GEBR_points.Add(new XYPoint(cur_x, cur_y * 3.6));
+                    }
                     double next_cur_x = cur_x - GlobalParams.DistanceStep;
                     double next_cur_y = Math.Pow(2 * min_em_braking_dec * GlobalParams.DistanceStep + Math.Pow(cur_y, 2), 0.5);
                     cur_x = next_cur_x;
@@ -217,8 +256,9 @@ namespace CBTCSpeedCurveTool.ViewModel
                 var ATP_points = new ChartValues<XYPoint>();
                 var conn_line_color = Colors.Black;
                 var conn_line_brush = new SolidColorBrush(Color.FromArgb(70, conn_line_color.R, conn_line_color.G, conn_line_color.B));
-                bool should_break = false;
-                foreach (var point in GEBR_points)
+                var reversed_GEBR_points = GEBR_points.Reverse();
+                bool last_point_at_res_end = false;
+                foreach (var point in reversed_GEBR_points)
                 {
                     //计算数据点
                     var conn_points = new ChartValues<XYPoint>();
@@ -239,24 +279,17 @@ namespace CBTCSpeedCurveTool.ViewModel
                     double y0 = Math.Max(0, ya - atp_respon_t * max_traction_acc);
                     double x0 = xa - (Math.Pow(ya, 2) - Math.Pow(y0, 2)) / (2 * max_traction_acc);
 
-                    //小于0则超出绘图范围，直接跳过
-                    if (x0 < 0 && should_break)
+                    var conn_line = new LineSeries()
                     {
-                        break;
-                    }
-                    else
-                    {
-                        var conn_line = new LineSeries()
-                        {
-                            Title = null,
-                            Fill = new SolidColorBrush(Colors.Transparent),
-                            Stroke = conn_line_brush,
-                            LineSmoothness = 0,
-                            StrokeDashArray = new DoubleCollection(2),
-                            PointGeometrySize = 5,                           
-                        };
-                        conn_line.SetValue(Panel.ZIndexProperty, 100);
-                        var conn_line_points = new ChartValues<XYPoint>()
+                        Title = null,
+                        Fill = new SolidColorBrush(Colors.Transparent),
+                        Stroke = conn_line_brush,
+                        LineSmoothness = 0,
+                        StrokeDashArray = new DoubleCollection(2),
+                        PointGeometrySize = 5,
+                    };
+                    conn_line.SetValue(Panel.ZIndexProperty, 100);
+                    var conn_line_points = new ChartValues<XYPoint>()
                         {
                             new XYPoint(x0,y0*3.6),
                             new XYPoint(xa,ya*3.6),
@@ -264,17 +297,37 @@ namespace CBTCSpeedCurveTool.ViewModel
                             new XYPoint(xc,yc*3.6),
                             new XYPoint(xd,yd*3.6)
                         };
-                        conn_line.Values = conn_line_points;
+                    conn_line.Values = conn_line_points;
+
+                    if (x0 >= temp_speed_restr_start_point && x0 <= temp_speed_restr_end_point)
+                    {
+                        lines_to_add.Add(conn_line);
+                        if (y0 * 3.6 <= temp_speed_restr)
+                        {
+                            //lines_to_add.Add(conn_line);
+
+                            //添加ATP曲线数据
+                            ATP_points.Add(new XYPoint(x0, y0 * 3.6));
+                        }
+                        else
+                        {
+                            //添加ATP曲线数据
+                            ATP_points.Add(new XYPoint(x0, ATP_points[ATP_points.Count - 1].Y));
+                            last_point_at_res_end = true;
+                        }
+                    }
+                    else
+                    {
                         lines_to_add.Add(conn_line);
 
                         //添加ATP曲线数据
-                        ATP_points.Add(new XYPoint(x0, y0 * 3.6));
-
-                        if (x0 < 0)
+                        if (last_point_at_res_end)
                         {
-                            should_break = true;
+                            ATP_points.Add(new XYPoint(x0, ATP_points[ATP_points.Count - 1].Y));
+                            last_point_at_res_end = false;
                         }
-                    }                   
+                        ATP_points.Add(new XYPoint(x0, y0 * 3.6));
+                    }
                 }
 
                 //绘制ATP曲线

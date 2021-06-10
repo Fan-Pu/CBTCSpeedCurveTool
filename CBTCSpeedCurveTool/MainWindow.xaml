@@ -8,6 +8,7 @@
     xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="CBTC速度曲线工具"
+    Loaded="RibbonWindow_Loaded"
     Width="1600"
     Height="900"
     WindowStartupLocation="CenterScreen"
