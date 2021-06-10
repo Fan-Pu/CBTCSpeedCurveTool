@@ -149,6 +149,7 @@ namespace CBTCSpeedCurveTool.ViewModel
                 AxisYCollection[0].SetRange(0, max_veloc);
 
                 CBTCSeries = new SeriesCollection();
+                List<LineSeries> lines_to_add = new List<LineSeries>();
 
                 //绘制最大速度曲线
                 var max_speed_line = new LineSeries()
@@ -163,7 +164,7 @@ namespace CBTCSpeedCurveTool.ViewModel
                     new XYPoint(target_distance,max_veloc)
                 };
                 max_speed_line.Values = max_speed_points;
-                CBTCSeries.Add(max_speed_line);
+                lines_to_add.Add(max_speed_line);
 
                 //绘制临时限速曲线
                 var temp_speed_color = Colors.Gray;
@@ -181,7 +182,7 @@ namespace CBTCSpeedCurveTool.ViewModel
                     new XYPoint(temp_speed_restr_end_point,temp_speed_restr)
                 };
                 temp_speed_restr_line.Values = temp_speed_restr_points;
-                CBTCSeries.Add(temp_speed_restr_line);
+                lines_to_add.Add(temp_speed_restr_line);
 
                 //绘制GEBR曲线
                 var GEBR_line = new LineSeries()
@@ -210,7 +211,7 @@ namespace CBTCSpeedCurveTool.ViewModel
                     cur_y = next_cur_y;
                 }
                 GEBR_line.Values = GEBR_points;
-                CBTCSeries.Add(GEBR_line);
+                lines_to_add.Add(GEBR_line);
 
                 //绘制连接线
                 var ATP_points = new ChartValues<XYPoint>();
@@ -264,7 +265,7 @@ namespace CBTCSpeedCurveTool.ViewModel
                             new XYPoint(xd,yd*3.6)
                         };
                         conn_line.Values = conn_line_points;
-                        CBTCSeries.Add(conn_line);
+                        lines_to_add.Add(conn_line);
 
                         //添加ATP曲线数据
                         ATP_points.Add(new XYPoint(x0, y0 * 3.6));
@@ -284,10 +285,12 @@ namespace CBTCSpeedCurveTool.ViewModel
                     Title = "ATP防护曲线",
                     Fill = atp_line_brush,
                     Stroke = atp_line_brush,
-                    LineSmoothness = 1,
+                    LineSmoothness = 0,
                 };
                 atp_line.Values = ATP_points;
-                CBTCSeries.Add(atp_line);
+                lines_to_add.Add(atp_line);
+
+                CBTCSeries.AddRange(lines_to_add);
             }
             catch
             {
